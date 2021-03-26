@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1616680933579" clover="3.2.0">
-  <project timestamp="1616680933579" name="All files">
+<coverage generated="1616681746072" clover="3.2.0">
+  <project timestamp="1616681746072" name="All files">
     <metrics statements="288" coveredstatements="287" conditionals="64" coveredconditionals="62" methods="50" coveredmethods="49" elements="402" coveredelements="398" complexity="0" loc="288" ncloc="288" packages="5" files="14" classes="14"/>
     <package name="express-jobly">
       <metrics statements="50" coveredstatements="49" conditionals="18" coveredconditionals="16" methods="8" coveredmethods="7"/>
@@ -72,11 +72,11 @@
       <file name="sql.js" path="/home/cole/Documents/Springboard/chapter_37_jobly_project/express-jobly/helpers/sql.js">
         <metrics statements="7" coveredstatements="7" conditionals="4" coveredconditionals="4" methods="2" coveredmethods="2"/>
         <line num="1" count="7" type="stmt"/>
-        <line num="6" count="14" type="stmt"/>
-        <line num="7" count="14" type="cond" truecount="2" falsecount="0"/>
-        <line num="10" count="12" type="stmt"/>
-        <line num="11" count="24" type="cond" truecount="2" falsecount="0"/>
-        <line num="14" count="12" type="stmt"/>
+        <line num="6" count="15" type="stmt"/>
+        <line num="7" count="15" type="cond" truecount="2" falsecount="0"/>
+        <line num="10" count="13" type="stmt"/>
+        <line num="11" count="26" type="cond" truecount="2" falsecount="0"/>
+        <line num="14" count="13" type="stmt"/>
         <line num="20" count="7" type="stmt"/>
       </file>
       <file name="tokens.js" path="/home/cole/Documents/Springboard/chapter_37_jobly_project/express-jobly/helpers/tokens.js">

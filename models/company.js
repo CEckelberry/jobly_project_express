@@ -1,7 +1,7 @@
 "use strict";
 
 const db = require("../db");
-const { BadRequestError, NotFoundError } = require("../expressError");
+const { BadRequestError, NotFoundError, ExpressError } = require("../expressError");
 const { sqlForPartialUpdate } = require("../helpers/sql");
 
 /** Related functions for companies. */
@@ -58,6 +58,35 @@ class Company {
                   logo_url AS "logoUrl"
            FROM companies
            ORDER BY name`);
+    return companiesRes.rows;
+  }
+
+  static async findSome(filters) {
+    console.log(filters)
+    let minEmployees = filters.minEmployees;
+    let maxEmployees = filters.maxEmployees;
+    let nameLike = "%" + filters.nameLike + "%";
+
+    if(minEmployees > maxEmployees){
+      let error = new ExpressError("Minimum employees must be less (<) than Maximum Employees!!", 400);
+      return (error);
+    }
+
+    console.log(minEmployees, maxEmployees, nameLike)
+    console.log(typeof(minEmployees), typeof(maxEmployees), typeof(nameLike))
+
+    const companiesRes = await db.query(
+          `SELECT handle,
+                  name,
+                  description,
+                  num_employees AS "numEmployees",
+                  logo_url AS "logoUrl"
+           FROM companies
+           WHERE name LIKE $3 
+           AND num_employees > $1 
+           AND num_employees < $2
+           ORDER BY name`, [minEmployees, maxEmployees, nameLike]);
+    console.log(`Companies.Rows ${companiesRes.rows}`)
     return companiesRes.rows;
   }
 
