@@ -55,7 +55,7 @@ router.get("/", async function (req, res, next) {
 
   try {
     console.log(`req.query ${req.query}`)
-    console.lo
+    
     if(Object.keys(req.query).length === 0){
       const companies = await Company.findAll();
       return res.json({ companies });

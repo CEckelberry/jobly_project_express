@@ -65,29 +65,134 @@ class Company {
     console.log(filters)
     let minEmployees = filters.minEmployees;
     let maxEmployees = filters.maxEmployees;
-    let nameLike = "%" + filters.nameLike + "%";
+    let nameLike = filters.nameLike;
+    //If Name Like is a real value, add % around it for like comparison
+    if(nameLike){
+      nameLike = "%" + filters.nameLike + "%";
+    }
 
-    if(minEmployees > maxEmployees){
+    if(parseInt(minEmployees) > parseInt(maxEmployees)){
       let error = new ExpressError("Minimum employees must be less (<) than Maximum Employees!!", 400);
       return (error);
     }
-
+    
     console.log(minEmployees, maxEmployees, nameLike)
-    console.log(typeof(minEmployees), typeof(maxEmployees), typeof(nameLike))
 
-    const companiesRes = await db.query(
-          `SELECT handle,
-                  name,
-                  description,
-                  num_employees AS "numEmployees",
-                  logo_url AS "logoUrl"
-           FROM companies
-           WHERE name LIKE $3 
-           AND num_employees > $1 
-           AND num_employees < $2
-           ORDER BY name`, [minEmployees, maxEmployees, nameLike]);
-    console.log(`Companies.Rows ${companiesRes.rows}`)
-    return companiesRes.rows;
+    /**
+     * All of these queries are testing whether variables are real or not, then applying a different query
+     * based on that information.
+     */
+
+    if(!maxEmployees & !nameLike){
+      console.log(`made it into !maxEmployees and !nameLike`)
+      const companiesRes = await db.query(
+        `SELECT handle,
+                name,
+                description,
+                num_employees AS "numEmployees",
+                logo_url AS "logoUrl"
+         FROM companies
+         WHERE num_employees >= $1 
+         ORDER BY name`, [minEmployees]);
+        console.log(`Companies.Rows ${companiesRes.rows}`)
+        return companiesRes.rows;
+    }
+
+    if(!maxEmployees & !minEmployees){
+      console.log(`made it into !maxEmployees and !minEmployees`)
+      const companiesRes = await db.query(
+        `SELECT handle,
+                name,
+                description,
+                num_employees AS "numEmployees",
+                logo_url AS "logoUrl"
+         FROM companies
+         WHERE name LIKE $1 
+         ORDER BY name`, [nameLike]);
+        console.log(`Companies.Rows ${companiesRes.rows}`)
+        return companiesRes.rows;
+    }
+
+    if(!minEmployees & !nameLike){
+      console.log(`made it into !minEmployees and !nameLike`)
+      const companiesRes = await db.query(
+        `SELECT handle,
+                name,
+                description,
+                num_employees AS "numEmployees",
+                logo_url AS "logoUrl"
+         FROM companies
+         WHERE num_employees <= $1
+         ORDER BY name`, [maxEmployees]);
+        console.log(`Companies.Rows ${companiesRes.rows}`)
+        return companiesRes.rows;
+    }
+
+
+    if(!minEmployees){
+      console.log(`made it into !minEmployees`)
+      const companiesRes = await db.query(
+        `SELECT handle,
+                name,
+                description,
+                num_employees AS "numEmployees",
+                logo_url AS "logoUrl"
+         FROM companies
+         WHERE name LIKE $2 
+         AND num_employees <= $1
+         ORDER BY name`, [maxEmployees, nameLike]);
+        console.log(`Companies.Rows ${companiesRes.rows}`)
+        return companiesRes.rows;
+    }
+
+    if(!maxEmployees){
+      console.log(`made it into !maxEmployees`)
+      const companiesRes = await db.query(
+        `SELECT handle,
+                name,
+                description,
+                num_employees AS "numEmployees",
+                logo_url AS "logoUrl"
+         FROM companies
+         WHERE name LIKE $2 
+         AND num_employees >= $1 
+         ORDER BY name`, [minEmployees, nameLike]);
+        console.log(`Companies.Rows ${companiesRes.rows}`)
+        return companiesRes.rows;
+    }
+
+    if(!nameLike){
+      console.log(`made it into !nameLike`)
+      const companiesRes = await db.query(
+        `SELECT handle,
+                name,
+                description,
+                num_employees AS "numEmployees",
+                logo_url AS "logoUrl"
+         FROM companies
+         WHERE num_employees >= $1 
+         AND num_employees <= $2
+         ORDER BY name`, [minEmployees, maxEmployees]);
+        console.log(`Companies.Rows ${companiesRes.rows}`)
+        return companiesRes.rows;
+    }
+
+    else {
+      console.log(`made it into all filters present`)
+      const companiesRes = await db.query(
+        `SELECT handle,
+                name,
+                description,
+                num_employees AS "numEmployees",
+                logo_url AS "logoUrl"
+         FROM companies
+         WHERE name LIKE $3 
+         AND num_employees >= $1 
+         AND num_employees <= $2
+         ORDER BY name`, [minEmployees, maxEmployees, nameLike]);
+        console.log(`Companies.Rows ${companiesRes.rows}`)
+        return companiesRes.rows;
+    }
   }
 
   /** Given a company handle, return data about company.

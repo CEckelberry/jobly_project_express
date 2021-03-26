@@ -96,6 +96,49 @@ describe("GET /companies", function () {
     });
   });
 
+
+  test("ok with URL query validating properly", async function () {
+    //Proper URL query will pass schema validation
+    const resp = await request(app).get("/companies?minEmployees=0&maxEmployees=3&nameLike=C");
+    expect(resp.body).toEqual({
+      companies:
+          [
+            {
+              handle: "c1",
+              name: "C1",
+              description: "Desc1",
+              numEmployees: 1,
+              logoUrl: "http://c1.img",
+            },
+            {
+              handle: "c2",
+              name: "C2",
+              description: "Desc2",
+              numEmployees: 2,
+              logoUrl: "http://c2.img",
+            },
+            {
+              handle: "c3",
+              name: "C3",
+              description: "Desc3",
+              numEmployees: 3,
+              logoUrl: "http://c3.img",
+            },
+          ],
+    });
+  });
+
+  test("NOT ok with URL query NOT validating properly", async function () {
+    //Test with improper query parameters that will fail schema validation
+    try{
+      const resp = await request(app).get("/companies?NAME=C");
+    } catch(err){
+      expect(err instanceof BadRequestError).toBeTruthy()
+    }
+    
+    
+  });
+
   test("fails: test next() handler", async function () {
     // there's no normal failure event which will cause this route to fail ---
     // thus making it hard to test that the error-handler works with it. This

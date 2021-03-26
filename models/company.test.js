@@ -1,7 +1,7 @@
 "use strict";
 
 const db = require("../db.js");
-const { BadRequestError, NotFoundError } = require("../expressError");
+const { BadRequestError, NotFoundError, ExpressError } = require("../expressError");
 const Company = require("./company.js");
 const {
   commonBeforeAll,
@@ -84,6 +84,223 @@ describe("findAll", function () {
         logoUrl: "http://c3.img",
       },
     ]);
+  });
+});
+
+/************************************** findSome */
+describe("findSome", function () {
+  test("works: with all filters in place", async () => {
+    /**
+     * This will capture all companies with these open filters
+     */
+    const allFilterUrlQuery = { minEmployees: '0', maxEmployees: '6', nameLike: 'C' }
+    let companies = await Company.findSome(allFilterUrlQuery);
+    expect(companies).toEqual([
+      {
+        handle: "c1",
+        name: "C1",
+        description: "Desc1",
+        numEmployees: 1,
+        logoUrl: "http://c1.img",
+      },
+      {
+        handle: "c2",
+        name: "C2",
+        description: "Desc2",
+        numEmployees: 2,
+        logoUrl: "http://c2.img",
+      },
+      {
+        handle: "c3",
+        name: "C3",
+        description: "Desc3",
+        numEmployees: 3,
+        logoUrl: "http://c3.img",
+      },
+    ]);
+  });
+
+  test("works: Filter for Minimum Employees Removed", async () => {
+    /**
+     * This will capture all companies with these open filters
+     */
+    const allFilterUrlQuery = { maxEmployees: '6', nameLike: 'C' }
+    let companies = await Company.findSome(allFilterUrlQuery);
+    expect(companies).toEqual([
+      {
+        handle: "c1",
+        name: "C1",
+        description: "Desc1",
+        numEmployees: 1,
+        logoUrl: "http://c1.img",
+      },
+      {
+        handle: "c2",
+        name: "C2",
+        description: "Desc2",
+        numEmployees: 2,
+        logoUrl: "http://c2.img",
+      },
+      {
+        handle: "c3",
+        name: "C3",
+        description: "Desc3",
+        numEmployees: 3,
+        logoUrl: "http://c3.img",
+      },
+    ]);
+  });
+
+  test("works: Filter for Maximum Employees Removed", async () => {
+    /**
+     * This will capture all companies with these open filters
+     */
+    const allFilterUrlQuery = { minEmployees: '0', nameLike: 'C' }
+    let companies = await Company.findSome(allFilterUrlQuery);
+    expect(companies).toEqual([
+      {
+        handle: "c1",
+        name: "C1",
+        description: "Desc1",
+        numEmployees: 1,
+        logoUrl: "http://c1.img",
+      },
+      {
+        handle: "c2",
+        name: "C2",
+        description: "Desc2",
+        numEmployees: 2,
+        logoUrl: "http://c2.img",
+      },
+      {
+        handle: "c3",
+        name: "C3",
+        description: "Desc3",
+        numEmployees: 3,
+        logoUrl: "http://c3.img",
+      },
+    ]);
+  });
+
+  test("works: Filter for NameLike Removed", async () => {
+    /**
+     * This will capture all companies with these open filters
+     */
+    const allFilterUrlQuery = { minEmployees: '0', maxEmployees: '6' }
+    let companies = await Company.findSome(allFilterUrlQuery);
+    expect(companies).toEqual([
+      {
+        handle: "c1",
+        name: "C1",
+        description: "Desc1",
+        numEmployees: 1,
+        logoUrl: "http://c1.img",
+      },
+      {
+        handle: "c2",
+        name: "C2",
+        description: "Desc2",
+        numEmployees: 2,
+        logoUrl: "http://c2.img",
+      },
+      {
+        handle: "c3",
+        name: "C3",
+        description: "Desc3",
+        numEmployees: 3,
+        logoUrl: "http://c3.img",
+      },
+    ]);
+  });
+
+  test("works: Filter for NameLike Removed AND minEmployees removes one company from list", async () => {
+    /**
+     * This will capture 2 companies with the minEmployees filtering out C1
+     */
+    const allFilterUrlQuery = { minEmployees: '2', maxEmployees: '6' }
+    let companies = await Company.findSome(allFilterUrlQuery);
+    expect(companies).toEqual([
+      {
+        handle: "c2",
+        name: "C2",
+        description: "Desc2",
+        numEmployees: 2,
+        logoUrl: "http://c2.img",
+      },
+      {
+        handle: "c3",
+        name: "C3",
+        description: "Desc3",
+        numEmployees: 3,
+        logoUrl: "http://c3.img",
+      },
+    ]);
+  });
+
+  test("works: Filter for NameLike Removed AND MaxEmployees removes one company from list", async () => {
+    /**
+     * This will capture 2 companies with the maxEmployees filtering out C3
+     */
+    const allFilterUrlQuery = { minEmployees: '0', maxEmployees: '2' }
+    let companies = await Company.findSome(allFilterUrlQuery);
+    expect(companies).toEqual([
+      {
+        handle: "c1",
+        name: "C1",
+        description: "Desc1",
+        numEmployees: 1,
+        logoUrl: "http://c1.img",
+      },
+      {
+        handle: "c2",
+        name: "C2",
+        description: "Desc2",
+        numEmployees: 2,
+        logoUrl: "http://c2.img",
+      },
+    ]);
+  });
+
+  test("works: But returns nothing due to name not having any matches", async () => {
+    /**
+     * This will capture nothing due to name not having any matches"
+     */
+    const allFilterUrlQuery = {minEmployees: '0', maxEmployees: '6', nameLike: 'D' }
+    let companies = await Company.findSome(allFilterUrlQuery);
+    expect(companies).toEqual([
+    ]);
+  });
+
+  test("works: But returns nothing due to minEmployees being too high", async () => {
+    /**
+     * This will capture nothing due to minEmployees being too high"
+     */
+    const allFilterUrlQuery = {minEmployees: '6', maxEmployees: '12', nameLike: 'C' }
+    let companies = await Company.findSome(allFilterUrlQuery);
+    expect(companies).toEqual([
+    ]);
+  });
+
+  test("works: But returns nothing due to Max Employees being too low", async () => {
+    /**
+     * This will capture nothing due to maxEmployees being too low"
+     */
+    const allFilterUrlQuery = {minEmployees: '0', maxEmployees: '0', nameLike: 'C' }
+    let companies = await Company.findSome(allFilterUrlQuery);
+    expect(companies).toEqual([
+    ]);
+  });
+
+  test("Will not work as minEmployees > maxEmployees!", async () => {
+    /**
+     * This will capture nothing due to minEmployees > maxEmployee"
+     */
+    try{
+      const allFilterUrlQuery = {minEmployees: '4', maxEmployees: '2', nameLike: 'C' }
+      let companies = await Company.findSome(allFilterUrlQuery);
+    }catch(err){
+      expect(err instanceof ExpressError).toBeTruthy();
+    }
   });
 });
 
