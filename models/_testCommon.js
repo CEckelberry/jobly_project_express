@@ -40,7 +40,7 @@ async function commonBeforeAll() {
          ('Energy engineer', 62000, .25, 'c3')
   RETURNING id, title, salary, equity, company_handle`)
   testJobIds.splice(0, 0, ...resultsJobs.rows.map(r => r.id));
-  console.log(`_testCommon TESTJOBIDS: ${testJobIds}`)
+  //console.log(`_testCommon TESTJOBIDS: ${testJobIds}`)
 }
 
 async function commonBeforeEach() {

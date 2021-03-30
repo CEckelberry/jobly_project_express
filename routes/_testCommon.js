@@ -6,13 +6,15 @@ const Company = require("../models/company");
 const Job = require("../models/job")
 const { createToken } = require("../helpers/tokens");
 
+const testJobIds = [];
+
 async function commonBeforeAll() {
   // noinspection SqlWithoutWhere
   await db.query("DELETE FROM users");
   // noinspection SqlWithoutWhere
   await db.query("DELETE FROM companies");
   // noinspection SqlWithoutWhere
-  await db.query("DELETE FROM jobs");
+  //await db.query("DELETE FROM jobs");
 
   await Company.create(
       {
@@ -38,6 +40,19 @@ async function commonBeforeAll() {
         description: "Desc3",
         logoUrl: "http://c3.img",
       });
+
+
+    try{
+      testJobIds[0] = (await Job.create(
+        { title: "J1", salary: 1, equity: "0.1", company_handle: "c1" })).id;
+      testJobIds[1] = (await Job.create(
+        { title: "J2", salary: 2, equity: "0.2", company_handle: "c1" })).id;
+      testJobIds[2] = (await Job.create(
+        { title: "J3", salary: 3, equity: null, company_handle: "c1" })).id;  
+    }catch(e){
+      return next(e);
+    }
+    
 
   await User.register({
     username: "u1",
@@ -72,24 +87,7 @@ async function commonBeforeAll() {
     isAdmin: true,
   });
 
-  await Job.create({
-    title: 'Information officer',
-    salary: 200000,
-    equity: .02,
-    company_handle: "c1"
-  });
-  await Job.create({
-    title: 'Early years teacher',
-    salary: 55000,
-    equity: 0,
-    company_handle: "c2"
-  });
-  await Job.create({
-    title: 'Energy engineer',
-    salary: 62000,
-    equity: .25,
-    company_handle: "c3"
-  });
+  await User.applyToJob("u1", testJobIds[0]);
 }
 
 async function commonBeforeEach() {
@@ -106,7 +104,12 @@ async function commonAfterAll() {
 
 
 const u1Token = createToken({ username: "u1", isAdmin: false });
-const u4Token = createToken({ username: "u4", isAdmin: true })
+const u2Token = createToken({ username: "u2", isAdmin: false });
+const u4Token = createToken({ username: "u4", isAdmin: true });
+
+testJobIds[4] = 69; 
+
+console.log(`testJobIds TestCommon Routes: ${testJobIds}`)
 
 
 module.exports = {
@@ -115,5 +118,7 @@ module.exports = {
   commonAfterEach,
   commonAfterAll,
   u1Token,
+  u2Token,
   u4Token,
+  testJobIds,
 };

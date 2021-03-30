@@ -8,19 +8,11 @@ const { sqlForPartialUpdate } = require("../helpers/sql");
 
 class Job{
 /**Create a job (from data), update db, return new job data
- * data should be {}
- * Returns {}
- * Throws BadRequestError if job already in database. */    
+ * data should be {title, salary, equity, company_handle}
+ * Returns {id, title, salary, equity, company_handle}
+  */    
 
- static async create({ title, salary, equity, company_handle,}) {
-    const duplicateCheck = await db.query(
-          `SELECT title
-           FROM jobs
-           WHERE title = $1 AND company_handle = $2`,
-        [title, company_handle]);
-
-    if (duplicateCheck.rows[0])
-      throw new BadRequestError(`Duplicate job: ${title} at company ${company_handle}`);
+ static async create({ title, salary, equity, company_handle }) {
 
     const result = await db.query(
           `INSERT INTO jobs
@@ -32,11 +24,11 @@ class Job{
             salary, 
             equity, 
             company_handle
-        ],
+        ]
     );
-    const company = result.rows[0];
+    const job = result.rows[0];
 
-    return company;
+    return job;
   }
 
   /** Find all jobs.
@@ -136,16 +128,16 @@ class Job{
     const { setCols, values } = sqlForPartialUpdate(
         data,
         {});
-    constjobIdx = "$" + (values.length + 1);
+    const jobIdx = "$" + (values.length + 1);
 
     const querySql = `UPDATE jobs 
                       SET ${setCols} 
-                      WHERE id = ${constjobIdx} 
+                      WHERE id = ${jobIdx} 
                       RETURNING id, 
                                 title, 
                                 salary, 
                                 equity, 
-                                company_handle"`;
+                                company_handle`;
     const result = await db.query(querySql, [...values, id]);
     const job = result.rows[0];
 
@@ -154,16 +146,22 @@ class Job{
     return job;
   }
 
-  static async remove(handle) {
+
+  /** Delete given job from database; returns undefined.
+   *
+   * Throws NotFoundError if job not found.
+   **/
+
+  static async remove(id) {
     const result = await db.query(
           `DELETE
-           FROM companies
-           WHERE handle = $1
-           RETURNING handle`,
-        [handle]);
-    const company = result.rows[0];
+           FROM jobs
+           WHERE id = $1
+           RETURNING id`,
+        [id]);
+    const job = result.rows[0];
 
-    if (!company) throw new NotFoundError(`No company: ${handle}`);
+    if (!job) throw new NotFoundError(`No company: ${id}`);
   }
 
 }
